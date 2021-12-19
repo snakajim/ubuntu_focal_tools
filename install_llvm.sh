@@ -32,11 +32,23 @@ function hostarch () {
 hostarch
 
 #
+# install CMAKE 3.22.1 if not new
+#
+CMAKE_VERSION=$(cmake --version | awk 'NR<2 { print $3 }' | awk -F. '{printf "%2d%02d%02d", $1,$2,$3}')
+if [ "$CMAKE_VERSION" -lt 120000 ]; then
+  echo "upgrade cmake version"
+  mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && \
+  aria2c -x10 https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1.tar.gz
+  tar -zxvf cmake-3.22.1.tar.gz
+  sudo apt -y install libssl-dev openssl
+  cd cmake-3.22.1 && ./bootstrap && make -j`nproc`
+  sudo make install
+fi
+
+#
 # install LLVM ${LLVM_VERSION} if not available
 #
 CLANG_VERSION=$(clang --version | awk 'NR<2 { print $3 }' | awk -F. '{printf "%2d%02d%02d", $1,$2,$3}')
-
-start_time=`date +%s`
 
 if [ $HOSTARCH == "aarch64" ]; then
   if [ -f ${HOME}/download/clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz ]; then
@@ -58,6 +70,7 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
   mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && aria2c -x10 $LLVM_URL
   unxz -k -T `nproc`  llvm-project-${LLVM_VERSION}.src.tar.xz && tar xf llvm-project-${LLVM_VERSION}.src.tar && \
     cd llvm-project-${LLVM_VERSION}.src && mkdir -p build && cd build
+  start_time=`date +%s`
   cmake -G Ninja -G "Unix Makefiles"\
     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
     -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
@@ -67,6 +80,8 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
     -DCMAKE_INSTALL_PREFIX="/usr/local/llvm_${LLVM_VERSION}" \
     ../llvm && make -j`nproc`
+  end_time=`date +%s`
+  run_time=$((end_time - start_time))
   sudo make install && cd ${HOME}
   echo "# " >> ${HOME}/.bashrc
   echo "# LLVM setting to ${LLVM_VERSION}"   >> ${HOME}/.bashrc
@@ -81,8 +96,6 @@ else
   echo `clang --version`  
 fi
 
-end_time=`date +%s`
-run_time=$((end_time - start_time))
 echo "cat /proc/cpuinfo" > run.log
 cat /proc/cpuinfo  >> run.log
 echo "nproc" >> run.log
