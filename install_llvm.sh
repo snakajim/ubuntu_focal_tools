@@ -36,6 +36,8 @@ hostarch
 #
 CLANG_VERSION=$(clang --version | awk 'NR<2 { print $3 }' | awk -F. '{printf "%2d%02d%02d", $1,$2,$3}')
 
+start_time=`date +%s`
+
 if [ $HOSTARCH == "aarch64" ]; then
   if [ -f ${HOME}/download/clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz ]; then
   echo "You have pre-build clang for aarch64, use this to short cut."
@@ -60,7 +62,7 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
     -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
     -DLLVM_ENABLE_PROJECTS=clang \
-    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libc;libclc"
+    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libc;libclc;flang"
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
     -DCMAKE_INSTALL_PREFIX="/usr/local/llvm_${LLVM_VERSION}" \
@@ -78,3 +80,14 @@ else
   echo "Your clang is new. No need to update."
   echo `clang --version`  
 fi
+
+end_time=`date +%s`
+run_time=$((end_time - start_time))
+echo "cat /proc/cpuinfo" > run.log
+cat /proc/cpuinfo  >> run.log
+echo "nproc" >> run.log
+nproc >> run.log
+echo "/usr/bin/g++ version" >> run.log
+/usr/bin/g++ --version >> run.log
+echo "install_llvm.sh costs $run_time[s]." >> run.log
+echo ""
