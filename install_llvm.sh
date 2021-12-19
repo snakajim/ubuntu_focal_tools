@@ -67,7 +67,9 @@ fi
 if [ "$CLANG_VERSION" -lt 120000 ]; then
   echo "Your clang is not new. Need to update."
   echo `clang --version`
-  mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && aria2c -x10 $LLVM_URL
+  if [ ! -f ${HOME}/tmp/llvm-project-${LLVM_VERSION}.src.tar.xz ]; then
+    mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && aria2c -x10 $LLVM_URL
+  fi
   unxz -k -T `nproc`  llvm-project-${LLVM_VERSION}.src.tar.xz && tar xf llvm-project-${LLVM_VERSION}.src.tar && \
     cd llvm-project-${LLVM_VERSION}.src && mkdir -p build && cd build
   start_time=`date +%s`
