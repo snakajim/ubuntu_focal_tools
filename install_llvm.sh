@@ -41,7 +41,7 @@ if [ "$CMAKE_VERSION" -lt 120000 ]; then
   aria2c -x10 https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1.tar.gz
   tar -zxvf cmake-3.22.1.tar.gz
   sudo apt -y install libssl-dev openssl
-  cd cmake-3.22.1 && ./bootstrap && make -j`nproc`
+  cd cmake-3.22.1 && cmake . && make -j`nproc`
   sudo make install
 fi
 
