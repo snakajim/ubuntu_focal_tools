@@ -35,7 +35,7 @@ hostarch
 # install CMAKE 3.22.1 if not new
 #
 CMAKE_VERSION=$(cmake --version | awk 'NR<2 { print $3 }' | awk -F. '{printf "%2d%02d%02d", $1,$2,$3}')
-if [ "$CMAKE_VERSION" -lt 120000 ]; then
+if [ "$CMAKE_VERSION" -lt 32000 ]; then
   echo "upgrade cmake version"
   mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && \
   aria2c -x10 https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1.tar.gz
