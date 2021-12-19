@@ -62,7 +62,7 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
     -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
     -DLLVM_ENABLE_PROJECTS=clang \
-    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libc;libclc;flang"
+    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libc;libclc;flang" \
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
     -DCMAKE_INSTALL_PREFIX="/usr/local/llvm_${LLVM_VERSION}" \
