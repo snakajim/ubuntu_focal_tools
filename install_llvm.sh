@@ -78,7 +78,6 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
     -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
     -DLLVM_ENABLE_PROJECTS=clang \
-    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libc;libclc;flang" \
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
     -DCMAKE_INSTALL_PREFIX="/usr/local/llvm_${LLVM_VERSION}" \
@@ -96,14 +95,15 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
   echo "export LD_LIBRARY_PATH=\$LLVM_DIR/lib:\$LD_LIBRARY_PATH"   >>  ${HOME}/.bashrc
 else
   echo "Your clang is new. No need to update."
-  echo `clang --version`  
+  echo `clang --version`
+  run_time="default"  
 fi
 
-echo "cat /proc/cpuinfo" > run.log
-cat /proc/cpuinfo  >> run.log
-echo "nproc" >> run.log
-nproc >> run.log
-echo "/usr/bin/g++ version" >> run.log
-/usr/bin/g++ --version >> run.log
-echo "install_llvm.sh costs $run_time[s]." >> run.log
+echo "cat /proc/cpuinfo" > ${HOME}/tmp/run.log
+cat /proc/cpuinfo  >> ${HOME}/tmp/run.log
+echo "nproc" >> ${HOME}/tmp/run.log
+nproc >> ${HOME}/tmp/run.log
+echo "/usr/bin/g++ version" >> ${HOME}/tmp/run.log
+/usr/bin/g++ --version >> ${HOME}/tmp/run.log
+echo "install_llvm.sh costs $run_time sec." >> ${HOME}/tmp/run.log
 echo ""
