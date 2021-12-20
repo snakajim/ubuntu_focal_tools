@@ -34,6 +34,7 @@ hostarch
 #
 # install CMAKE 3.22.1 if not new
 #
+sudo apt -y update && sudo apt -y install build-essential wget git cmake g++ clang aria2 sudo
 CMAKE_VERSION=$(cmake --version | awk 'NR<2 { print $3 }' | awk -F. '{printf "%2d%02d%02d", $1,$2,$3}')
 if [ "$CMAKE_VERSION" -lt 32000 ]; then
   echo "upgrade cmake version"
