@@ -42,7 +42,7 @@ if [ "$CMAKE_VERSION" -lt 32000 ]; then
   tar -zxvf cmake-3.22.1.tar.gz
   sudo apt -y install libssl-dev openssl
   cd cmake-3.22.1 && cmake . && make -j`nproc`
-  sudo make install
+  sudo make install && sudo ldconfig -v && source ${HOME}/.bashrc
 fi
 
 #
