@@ -63,6 +63,7 @@ if [ $HOSTARCH == "aarch64" ]; then
     unxz -k -T `nproc`  clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz && \
     sudo tar xvf clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar --strip-components 1 -C /usr/local
     sudo ldconfig -v
+    read -p "LLVM ${LLVM_VERSION} install is done by pre-build. : (enter to exit) "
   exit
   else
   echo "Pre-build clang for aarch64 is not found."
