@@ -71,7 +71,7 @@ if [ $HOSTARCH == "aarch64" ]; then
   fi
 fi
 
-if [ "$CLANG_VERSION" -lt 120000 ]; then
+if [ "$CLANG_VERSION" -lt 130000 ]; then
   echo "Your clang is not new. Need to update."
   echo `clang --version`
   if [ ! -f ${HOME}/tmp/llvm-project-${LLVM_VERSION}.src.tar.xz ]; then
@@ -88,7 +88,7 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
-    -DCMAKE_INSTALL_PREFIX="/usr/local/test/llvm_${LLVM_VERSION}" \
+    -DCMAKE_INSTALL_PREFIX="/usr/local/llvm_${LLVM_VERSION}" \
     ../llvm && make -j`nproc`
   end_time=`date +%s`
   run_time=$((end_time - start_time))
