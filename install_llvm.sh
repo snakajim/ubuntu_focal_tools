@@ -34,7 +34,7 @@ hostarch
 #
 # install CMAKE 3.22.1 if not new
 #
-sudo apt -y update && sudo apt -y install build-essential wget git cmake g++ clang aria2 sudo
+sudo apt -y update && sudo apt -y install build-essential wget git cmake g++ clang aria2 sudo && sudo autoremove
 CMAKE_VERSION=$(cmake --version | awk 'NR<2 { print $3 }' | awk -F. '{printf "%2d%02d%02d", $1,$2,$3}')
 if [ "$CMAKE_VERSION" -lt 32000 ]; then
   echo "upgrade cmake version"
@@ -63,6 +63,7 @@ if [ $HOSTARCH == "aarch64" ]; then
     unxz -k -T `nproc`  clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz && \
     sudo tar xvf clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar --strip-components 1 -C /usr/local
     sudo ldconfig -v
+    read -p "LLVM ${LLVM_VERSION} install is done by pre-build. : (enter to exit) "
   exit
   else
   echo "Pre-build clang for aarch64 is not found."
@@ -70,7 +71,7 @@ if [ $HOSTARCH == "aarch64" ]; then
   fi
 fi
 
-if [ "$CLANG_VERSION" -lt 120000 ]; then
+if [ "$CLANG_VERSION" -lt 130000 ]; then
   echo "Your clang is not new. Need to update."
   echo `clang --version`
   if [ ! -f ${HOME}/tmp/llvm-project-${LLVM_VERSION}.src.tar.xz ]; then
@@ -84,6 +85,7 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
     -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
     -DLLVM_ENABLE_PROJECTS=clang \
+    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
     -DCMAKE_INSTALL_PREFIX="/usr/local/llvm_${LLVM_VERSION}" \
@@ -91,14 +93,18 @@ if [ "$CLANG_VERSION" -lt 120000 ]; then
   end_time=`date +%s`
   run_time=$((end_time - start_time))
   sudo make install && cd ${HOME}
-  echo "# " >> ${HOME}/.bashrc
-  echo "# LLVM setting to ${LLVM_VERSION}"   >> ${HOME}/.bashrc
-  echo "# " >> ${HOME}/.bashrc
-  echo "export LLVM_VERSION=${LLVM_VERSION}" >> ${HOME}/.bashrc
-  echo "export LLVM_DIR=/usr/local/llvm_${LLVM_VERSION}">> ${HOME}/.bashrc
-  echo "export PATH=\$LLVM_DIR/bin:\$PATH"   >>  ${HOME}/.bashrc
-  echo "export LIBRARY_PATH=\$LLVM_DIR/lib:\$LIBRARY_PATH"   >>  ${HOME}/.bashrc
-  echo "export LD_LIBRARY_PATH=\$LLVM_DIR/lib:\$LD_LIBRARY_PATH"   >>  ${HOME}/.bashrc
+  grep LLVM_VERSION ${HOME}/.bashrc
+  ret=$?
+  if [ $ret == "1" ]; then
+    echo "# " >> ${HOME}/.bashrc
+    echo "# LLVM setting to ${LLVM_VERSION}"   >> ${HOME}/.bashrc
+    echo "# " >> ${HOME}/.bashrc
+    echo "export LLVM_VERSION=${LLVM_VERSION}" >> ${HOME}/.bashrc
+    echo "export LLVM_DIR=/usr/local/llvm_${LLVM_VERSION}">> ${HOME}/.bashrc
+    echo "export PATH=\$LLVM_DIR/bin:\$PATH"   >>  ${HOME}/.bashrc
+    echo "export LIBRARY_PATH=\$LLVM_DIR/lib:\$LIBRARY_PATH"   >>  ${HOME}/.bashrc
+    echo "export LD_LIBRARY_PATH=\$LLVM_DIR/lib:\$LD_LIBRARY_PATH"   >>  ${HOME}/.bashrc
+  fi
 else
   echo "Your clang is new. No need to update."
   echo `clang --version`
