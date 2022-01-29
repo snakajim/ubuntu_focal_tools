@@ -12,17 +12,16 @@ LLVM_PREBUILD_AARCH64="https://github.com/llvm/llvm-project/releases/download/ll
 # set $HOSTARCH 
 #
 function hostarch () {
-  uname -a | grep -q "x86_64 x86_64"
-  ret1=$?
-  uname -a | grep -q "aarch64 aarch64"
-  ret2=$?
-  if [ $ret1 -eq 0 ] && [ $ret2 -eq 1 ]; then
+  HOSTARCH=`uname -m`
+  if [ $HOSTARCH == "x86_64" ]; then
     HOSTARCH="x86_64"
   else
-    if [ $ret1 -eq 1 ] && [ $ret2 -eq 0 ]; then
+    if [ $HOSTARCH == "aarch64" ]; then
       HOSTARCH="aarch64"
     else
       HOSTARCH="unknown"
+      echo "My HOSTARCH=$HOSTARCH, Program exit"
+      exit
     fi
   fi
   echo "My HOSTARCH=$HOSTARCH"
@@ -34,7 +33,7 @@ hostarch
 #
 # install CMAKE 3.22.1 if not new
 #
-sudo apt -y update && sudo apt -y install build-essential wget git cmake g++ aria2 sudo && sudo autoremove
+sudo apt -y update && sudo apt -y install build-essential wget git cmake g++ aria2 sudo && sudo apt -y autoremove
 CMAKE_VERSION=$(cmake --version | awk 'NR<2 { print $3 }' | awk -F. '{printf "%2d%02d%02d", $1,$2,$3}')
 if [ "$CMAKE_VERSION" -lt 31200 ]; then
   echo "upgrade cmake version"
@@ -43,7 +42,7 @@ if [ "$CMAKE_VERSION" -lt 31200 ]; then
   tar -zxvf cmake-3.22.1.tar.gz
   sudo apt -y install libssl-dev openssl
   cd cmake-3.22.1 && cmake . && make -j`nproc`
-  sudo make install
+  sudo make install && make clean
   export CMAKE_ROOT=/usr/local/share/cmake-3.22
   echo "# CMAKE_ROOT setting" >> ${HOME}/.bashrc
   echo "export CMAKE_ROOT=/usr/local/share/cmake-3.22" >> ${HOME}/.bashrc
@@ -62,22 +61,8 @@ else
   CLANG_VERSION="0"
 fi
 
-if [ $HOSTARCH == "aarch64" ]; then
-  if [ -f ${HOME}/download/clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz ]; then
-  echo "You have pre-build clang for aarch64, use this to short cut."
-  cd ${HOME}/download && \
-    unxz -k -T `nproc`  clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz && \
-    sudo tar xvf clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar --strip-components 1 -C /usr/local
-    sudo ldconfig -v
-    read -p "LLVM ${LLVM_VERSION} install is done by pre-build. : (enter to exit) "
-  exit
-  else
-  echo "Pre-build clang for aarch64 is not found."
-  echo "Build & Install is selected(it takes 6-8 hours)."
-  fi
-fi
 
-if [ "$CLANG_VERSION" -lt 130000 ]; then
+if ( [ $HOSTARCH == "aarch64" ] || [ $HOSTARCH == "x86_64" ] ) && [ "$CLANG_VERSION" -lt 150000 ]; then
   echo "Your clang is not new. Need to update."
   echo `clang --version`
   if [ ! -f ${HOME}/tmp/llvm-project-${LLVM_VERSION}.src.tar.xz ]; then
@@ -90,7 +75,7 @@ if [ "$CLANG_VERSION" -lt 130000 ]; then
   cmake -G Ninja -G "Unix Makefiles"\
     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
     -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
-    -DLLVM_ENABLE_PROJECTS=clang \
+    -DLLVM_ENABLE_PROJECTS="clang;lld" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
@@ -98,23 +83,24 @@ if [ "$CLANG_VERSION" -lt 130000 ]; then
     ../llvm && make -j`nproc`
   end_time=`date +%s`
   run_time=$((end_time - start_time))
-  sudo make install && cd ${HOME}
-  grep LLVM_VERSION ${HOME}/.bashrc
-  ret=$?
-  if [ $ret == "1" ]; then
+  sudo make install && make clean && cd ../ && rm -rf build && cd ${HOME}
+fi
+
+#
+# Update ~/.bashrc if necesarry
+#
+grep LLVM_VERSION ${HOME}/.bashrc
+ret=$?
+if [ $ret == "1" ] && [ -d /usr/local/llvm_${LLVM_VERSION} ]; then
     echo "# " >> ${HOME}/.bashrc
-    echo "# LLVM setting to ${LLVM_VERSION}"   >> ${HOME}/.bashrc
+    echo "# LLVM setting to \${LLVM_VERSION}"   >> ${HOME}/.bashrc
     echo "# " >> ${HOME}/.bashrc
     echo "export LLVM_VERSION=${LLVM_VERSION}" >> ${HOME}/.bashrc
-    echo "export LLVM_DIR=/usr/local/llvm_${LLVM_VERSION}">> ${HOME}/.bashrc
+    echo "export LLVM_DIR=/usr/local/llvm_\${LLVM_VERSION}">> ${HOME}/.bashrc
     echo "export PATH=\$LLVM_DIR/bin:\$PATH"   >>  ${HOME}/.bashrc
     echo "export LIBRARY_PATH=\$LLVM_DIR/lib:\$LIBRARY_PATH"   >>  ${HOME}/.bashrc
     echo "export LD_LIBRARY_PATH=\$LLVM_DIR/lib:\$LD_LIBRARY_PATH"   >>  ${HOME}/.bashrc
-  fi
-else
-  echo "Your clang is new. No need to update."
-  echo `clang --version`
-  run_time="default"  
+    echo "export LLVM_CONFIG=\$LLVM_DIR/bin/llvm-config"   >>  ${HOME}/.bashrc
 fi
 
 echo "cat /proc/cpuinfo" > ${HOME}/tmp/run.log
@@ -123,5 +109,5 @@ echo "nproc" >> ${HOME}/tmp/run.log
 nproc >> ${HOME}/tmp/run.log
 echo "/usr/bin/g++ version" >> ${HOME}/tmp/run.log
 /usr/bin/g++ --version >> ${HOME}/tmp/run.log
-echo "install_llvm.sh costs $run_time sec." >> ${HOME}/tmp/run.log
+echo "install_llvm.sh costs $run_time [sec]." >> ${HOME}/tmp/run.log
 echo ""
