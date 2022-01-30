@@ -75,7 +75,7 @@ if ( [ $HOSTARCH == "aarch64" ] || [ $HOSTARCH == "x86_64" ] ) && [ "$CLANG_VERS
   cmake -G Ninja -G "Unix Makefiles"\
     -DCMAKE_C_COMPILER="/usr/bin/gcc" \
     -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
-    -DLLVM_ENABLE_PROJECTS="clang;lld" \
+    -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
