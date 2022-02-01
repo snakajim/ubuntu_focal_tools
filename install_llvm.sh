@@ -61,8 +61,9 @@ else
   CLANG_VERSION="0"
 fi
 
+FORCE_PREBUILD=1
 
-if ( [ $HOSTARCH == "aarch64" ] || [ $HOSTARCH == "x86_64" ] ) && [ "$CLANG_VERSION" -lt 150000 ]; then
+if ( ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "0" ] ) || [ $HOSTARCH == "x86_64" ] ) && [ "$CLANG_VERSION" -lt 150000 ]; then
   echo "Your clang is not new. Need to update."
   echo `clang --version`
   if [ ! -f ${HOME}/tmp/llvm-project-${LLVM_VERSION}.src.tar.xz ]; then
@@ -84,6 +85,17 @@ if ( [ $HOSTARCH == "aarch64" ] || [ $HOSTARCH == "x86_64" ] ) && [ "$CLANG_VERS
   end_time=`date +%s`
   run_time=$((end_time - start_time))
   sudo make install && make clean && cd ../ && rm -rf build && cd ${HOME}
+fi
+
+if ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "1" ] ) && [ "$CLANG_VERSION" -lt 150000 ]; then
+  echo "Your clang is not new. Need to update."
+  echo `clang --version`
+  if [ ! -f ${HOME}/tmp/clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz ]; then
+    mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && aria2c -x10 $LLVM_PREBUILD_AARCH64
+  fi
+  cd ${HOME}/tmp && unxz -k -T `nproc` -f clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz
+  mkdir -p /usr/local/llvm_${LLVM_VERSION}
+  cd ${HOME}/tmp && tar xf clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar --strip-components 1 -C /usr/local/llvm_${LLVM_VERSION}
 fi
 
 #
