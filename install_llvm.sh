@@ -94,8 +94,8 @@ if ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "1" ] ) && [ "$CLANG_VE
     mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && aria2c -x10 $LLVM_PREBUILD_AARCH64
   fi
   cd ${HOME}/tmp && unxz -k -T `nproc` -f clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz
-  mkdir -p /usr/local/llvm_${LLVM_VERSION}
-  cd ${HOME}/tmp && tar xf clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar --strip-components 1 -C /usr/local/llvm_${LLVM_VERSION}
+  sudo mkdir -p /usr/local/llvm_${LLVM_VERSION}
+  cd ${HOME}/tmp && sudo tar xf clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar --strip-components 1 -C /usr/local/llvm_${LLVM_VERSION}
 fi
 
 #
