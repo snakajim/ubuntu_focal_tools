@@ -3,9 +3,11 @@
 # Install LLVM on Ubuntu20.04 platform
 # Host linux is either x86_64 or aarch64
 #
+FORCE_PREBUILD=1
 LLVM_VERSION="13.0.0"
 LLVM_URL="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/llvm-project-${LLVM_VERSION}.src.tar.xz"
 LLVM_PREBUILD_AARCH64="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz"
+LLVM_PREBUILD_X86_64="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-20.04.tar.xz"
 
 #
 # Function hostarch()
@@ -61,9 +63,7 @@ else
   CLANG_VERSION="0"
 fi
 
-FORCE_PREBUILD=1
-
-if ( ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "0" ] ) || [ $HOSTARCH == "x86_64" ] ) && [ "$CLANG_VERSION" -lt 150000 ]; then
+if ( ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "0" ] ) || ( [ $HOSTARCH == "x86_64" ] && [ $FORCE_PREBUILD == "0" ] ) ) && [ "$CLANG_VERSION" -lt 150000 ]; then
   echo "Your clang is not new. Need to update."
   echo `clang --version`
   if [ ! -f ${HOME}/tmp/llvm-project-${LLVM_VERSION}.src.tar.xz ]; then
@@ -87,8 +87,20 @@ if ( ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "0" ] ) || [ $HOSTARC
   sudo make install && make clean && cd ../ && rm -rf build && cd ${HOME}
 fi
 
+if ( [ $HOSTARCH == "x86_64" ]  && [ $FORCE_PREBUILD == "1" ] ) && [ "$CLANG_VERSION" -lt 150000 ]; then
+  echo "Your clang is not new. Need to update from prebuild."
+  echo `clang --version`
+  if [ ! -f ${HOME}/tmp/clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-20.04.tar.xz ]; then
+    mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && aria2c -x10 $LLVM_PREBUILD_X86_64
+  fi
+  cd ${HOME}/tmp && unxz -k -T `nproc` -f clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+  sudo mkdir -p /usr/local/llvm_${LLVM_VERSION}
+  cd ${HOME}/tmp && sudo tar xf clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-20.04.tar --strip-components 1 -C /usr/local/llvm_${LLVM_VERSION}
+fi
+
+
 if ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "1" ] ) && [ "$CLANG_VERSION" -lt 150000 ]; then
-  echo "Your clang is not new. Need to update."
+  echo "Your clang is not new. Need to update from prebuild."
   echo `clang --version`
   if [ ! -f ${HOME}/tmp/clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz ]; then
     mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && aria2c -x10 $LLVM_PREBUILD_AARCH64
