@@ -49,9 +49,9 @@ start_time=`date +%s`
 cd ${HOME}/tmp/verilator && autoconf && \
   ./configure --prefix=/usr/local/verilator_4_${VERILATOR_REV} \
   CC=$CC \
-  CXX=$CXX && \
-  make -j`nproc` &> ${HOME}/run_verilator${VERILATOR_REV}.log && \
-  sudo make install
+  CXX=$CXX
+make -j`nproc`
+sudo make install
 end_time=`date +%s`
 run_time=$((end_time - start_time))
 cd ${HOME}/tmp/verilator && make clean
