@@ -3,8 +3,8 @@
 # Install LLVM on Ubuntu20.04 platform
 # Host linux is either x86_64 or aarch64
 #
-FORCE_PREBUILD=1
-LLVM_VERSION="13.0.0"
+FORCE_PREBUILD=0
+LLVM_VERSION="13.0.1"
 LLVM_URL="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/llvm-project-${LLVM_VERSION}.src.tar.xz"
 LLVM_PREBUILD_AARCH64="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz"
 LLVM_PREBUILD_X86_64="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-20.04.tar.xz"
@@ -74,14 +74,14 @@ if ( ( [ $HOSTARCH == "aarch64" ]  && [ $FORCE_PREBUILD == "0" ] ) || ( [ $HOSTA
     cd llvm-project-${LLVM_VERSION}.src && mkdir -p build && cd build
   start_time=`date +%s`
   cmake -G Ninja -G "Unix Makefiles"\
-    -DCMAKE_C_COMPILER="/usr/bin/gcc" \
-    -DCMAKE_CXX_COMPILER="/usr/bin/g++"\
+    -DCMAKE_C_COMPILER=`which clang` \
+    -DCMAKE_CXX_COMPILER=`which clang++`\
     -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
     -DCMAKE_BUILD_TYPE=RELEASE \
     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM"\
     -DCMAKE_INSTALL_PREFIX="/usr/local/llvm_${LLVM_VERSION}" \
-    ../llvm && make -j`nproc`
+    ../llvm && cmake --build . -j`nproc`
   end_time=`date +%s`
   run_time=$((end_time - start_time))
   sudo make install && make clean && cd ../ && rm -rf build && cd ${HOME}
