@@ -126,15 +126,15 @@ if [ $ret == "1" ] && [ -d /usr/local/llvm_${LLVM_VERSION} ]; then
     echo "export LD_LIBRARY_PATH=\$LLVM_DIR/lib:\$LD_LIBRARY_PATH"   >>  ${HOME}/.bashrc
     echo "export LLVM_CONFIG=\$LLVM_DIR/bin/llvm-config"   >>  ${HOME}/.bashrc
     # root /etc/skel
-    sudo echo "# " >> /etc/skel/.bashrc
-    sudo echo "# LLVM setting to \${LLVM_VERSION}"   >> /etc/skel/.bashrc
-    sudo echo "# " >> /etc/skel/.bashrc
-    sudo echo "export LLVM_VERSION=${LLVM_VERSION}" >> /etc/skel/.bashrc
-    sudo echo "export LLVM_DIR=/usr/local/llvm_\${LLVM_VERSION}">> /etc/skel/.bashrc
-    sudo echo "export PATH=\$LLVM_DIR/bin:\$PATH"   >>  /etc/skel/.bashrc
-    sudo echo "export LIBRARY_PATH=\$LLVM_DIR/lib:\$LIBRARY_PATH"   >>  /etc/skel/.bashrc
-    sudo echo "export LD_LIBRARY_PATH=\$LLVM_DIR/lib:\$LD_LIBRARY_PATH"   >>  /etc/skel/.bashrc
-    sudo echo "export LLVM_CONFIG=\$LLVM_DIR/bin/llvm-config"   >>  /etc/skel/.bashrc
+    echo "# " | sudo tee -a /etc/skel/.bashrc
+    echo "# LLVM setting to \${LLVM_VERSION}"   | sudo tee -a /etc/skel/.bashrc
+    echo "# " | sudo tee -a /etc/skel/.bashrc
+    echo "export LLVM_VERSION=${LLVM_VERSION}" | sudo tee -a /etc/skel/.bashrc
+    echo "export LLVM_DIR=/usr/local/llvm_\${LLVM_VERSION}"| sudo tee -a /etc/skel/.bashrc
+    echo "export PATH=\$LLVM_DIR/bin:\$PATH"   | sudo tee -a  /etc/skel/.bashrc
+    echo "export LIBRARY_PATH=\$LLVM_DIR/lib:\$LIBRARY_PATH"   | sudo tee -a  /etc/skel/.bashrc
+    echo "export LD_LIBRARY_PATH=\$LLVM_DIR/lib:\$LD_LIBRARY_PATH"   | sudo tee -a  /etc/skel/.bashrc
+    echo "export LLVM_CONFIG=\$LLVM_DIR/bin/llvm-config"   | sudo tee -a  /etc/skel/.bashrc
 fi
 
 echo "cat /proc/cpuinfo" > ${HOME}/tmp/run.log
