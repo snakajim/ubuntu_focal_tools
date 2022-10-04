@@ -2,7 +2,7 @@
 # This script is prepared for Ubuntu20.04 LTS, you may need tuning for other OS/version
 #
 
-VERILATOR_REV="216"
+VERILATOR_REV="228"
 URL_VERILATOR="https://github.com/verilator/verilator/tarball/v4.${VERILATOR_REV}"
 
 # dependencies update
