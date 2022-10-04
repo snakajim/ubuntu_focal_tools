@@ -20,3 +20,4 @@ echo \
 sudo apt-get -y update
 sudo apt-get -y install docker-ce docker-ce-cli containerd.io
 sudo chmod 777 /var/run/docker.sock
+sudo systemctl enable docker
