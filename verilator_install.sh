@@ -42,7 +42,7 @@ fi
 # install verilator 4_${VERILATOR_REV}
 #
 unset VERILATOR_ROOT 
-cd ${HOME}/tmp && rm -rf ${HOME}/tmp/verilator 
+mkdir -p ${HOME}/tmp && cd ${HOME}/tmp && rm -rf ${HOME}/tmp/verilator 
 mkdir -p verilator && wget --no-check-certificate https://github.com/verilator/verilator/tarball/v4.${VERILATOR_REV} -O verilator-v4.${VERILATOR_REV}.tgz
 cd ${HOME}/tmp && tar -xvf verilator-v4.${VERILATOR_REV}.tgz -C verilator --strip-components 1
 start_time=`date +%s`
